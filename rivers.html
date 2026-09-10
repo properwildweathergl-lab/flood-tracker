@@ -97,7 +97,7 @@
   <script>
     const map = L.map('riverMap').setView([51.865, -2.245], 10);
 
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; OpenStreetMap contributors | EA Open Data'
     }).addTo(map);
