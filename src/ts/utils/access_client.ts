@@ -4,7 +4,7 @@ import axios, { AxiosResponse } from 'axios';
  * This component provides methods for accessing the API.
 */
 export class AccessClient {
-  public static floodApiUrl: string = "https://environment.data.gov.uk/flood-monitoring/id/stations";
+ public static floodApiUrl: string = "https://environment.data.gov.uk/flood-monitoring/id/stations?lat=51.865&long=-2.245&dist=35&parameter=level";
 
   /**
     * Fetch data from the specified API endpoint using a get request.
