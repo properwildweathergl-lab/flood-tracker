@@ -23,18 +23,38 @@
       max-width: 900px;
       background: #ffffff;
       color: #0f4b82;
-      padding: 18px;
+      padding: 16px;
       border-radius: 14px;
-      text-align: center;
-      font-weight: 800;
-      font-size: 1.25rem;
-      margin-bottom: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      margin-bottom: 16px;
+    }
+    .title-text {
+      font-weight: 800;
+      font-size: 1.15rem;
+      text-align: center;
+    }
+    .search-input {
+      width: 100%;
+      max-width: 400px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 2px solid #cbd5e1;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 0.95rem;
+      outline: none;
+      box-sizing: border-box;
+    }
+    .search-input:focus {
+      border-color: #0f4b82;
     }
     .map-container {
       width: 100%;
       max-width: 900px;
-      height: 75vh;
+      height: 70vh;
       border-radius: 16px;
       overflow: hidden;
       box-shadow: 0 8px 24px rgba(0,0,0,0.25);
@@ -87,7 +107,10 @@
 </head>
 <body>
 
-  <div class="header-card">GLOUCESTERSHIRE WEATHER HUB - WATERWAYS MAP</div>
+  <div class="header-card">
+    <div class="title-text">GLOUCESTERSHIRE WEATHER HUB - WATERWAYS MAP</div>
+    <input type="text" id="stationSearch" class="search-input" placeholder="Search river or station name (e.g., Severn, Gloucester)..." onkeyup="filterStations()">
+  </div>
   
   <div class="map-container">
     <div id="riverMap"></div>
@@ -97,10 +120,12 @@
   <script>
     const map = L.map('riverMap').setView([51.865, -2.245], 10);
 
-   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       attribution: '&copy; OpenStreetMap contributors | EA Open Data'
     }).addTo(map);
+
+    let markersList = [];
 
     async function loadCountyStations() {
       try {
@@ -112,20 +137,37 @@
             if (station.lat && station.long) {
               const marker = L.marker([station.lat, station.long]).addTo(map);
               const riverName = station.riverName || 'Local Watercourse';
+              const label = station.label || '';
               
               marker.bindPopup(`
                 <div class="popup-title">${riverName}</div>
-                <div class="popup-station">${station.label}</div>
+                <div class="popup-station">${label}</div>
                 <div id="data-${station.stationReference}" class="loading-text" onclick="fetchReading('${station.stationReference}')">
                   Click to view live level
                 </div>
               `);
+
+              markersList.push({
+                marker: marker,
+                searchKey: (riverName + " " + label).toLowerCase()
+              });
             }
           });
         }
       } catch (err) {
         console.warn('Stations failed to load.', err);
       }
+    }
+
+    window.filterStations = function() {
+      const query = document.getElementById('stationSearch').value.toLowerCase();
+      markersList.forEach(item => {
+        if (item.searchKey.includes(query)) {
+          item.marker.addTo(map);
+        } else {
+          map.removeLayer(item.marker);
+        }
+      });
     }
 
     window.fetchReading = async function(stationRef) {
